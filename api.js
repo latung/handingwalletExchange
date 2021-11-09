@@ -51,7 +51,12 @@ app.get('/addChart', async (req, res) => {
                 typeTime
             }
         ]);
-        socket.emit('exchange', { data: 'test' });
+        socket.emit('exchange', {
+            data: {
+                status: 'next',
+                data: req.query,
+            }
+        });
         return res.status(200).send('success');
     } catch (error) {
         console.error("trigger smart contract error", error)

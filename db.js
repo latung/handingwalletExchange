@@ -53,7 +53,8 @@ async function handing() {
     let msg = arrHanding[0];
     for (let index = 0; index < msg.data.arrUser.length; index++) {
         const element = msg.data.arrUser[index];
-        io.to(element.id).emit('dataUsers', element);
+        console.log(element);
+        io.to(element).emit('dataUsers', element);
     }
     let { total_volume, max, min, price } = msg.data;
     total_volume = Number(total_volume);
@@ -85,10 +86,15 @@ async function handing() {
 }
 io.on("connection", (socket) => {
     // socket.emit("welcome", "lewlew")
+    socket.on('join', function (data) {
+        socket.join(data.id);
+        console.log('đã có thằng ', data.id);
+    });
     socket.on('exchange', async (msg) => {
         console.log('msg ', msg.data == 'msg');
         // msg.status = 'new';
-        if (msg.data !== 'test') {
+        io.emit('exchangeListen', { data: msg.data });
+        if (msg.data.status !== 'next') {
             arrHanding.push(msg)
         }
 
