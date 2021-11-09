@@ -91,7 +91,7 @@ io.on("connection", (socket) => {
         console.log('đã có thằng ', data.id);
     });
     socket.on('exchange', async (msg) => {
-        console.log('msg ', msg.data == 'msg');
+        console.log('msg s', msg.data.status !== 'next');
         // msg.status = 'new';
         io.emit('exchangeListen', { data: msg.data });
         if (msg.data.status !== 'next') {
