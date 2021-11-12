@@ -76,7 +76,7 @@ app.get('/getChart', async (req, res) => {
         await client.connect();
         const db = client.db(dbName);
         const collection = db.collection('chart');
-        const filteredDocs = await collection.find({ typeTime, type }).sort({ created: 1 }).limit(limit).toArray();
+        const filteredDocs = await collection.find({ typeTime, type }).sort({ created: -1 }).limit(limit).toArray();
         // return { time: d[0] / 1000, open: parseFloat(d[1]), high: parseFloat(d[2]), low: parseFloat(d[3]), close: parseFloat(d[4]) }
         let arr = [];
         for (let index = 0; index < filteredDocs.length; index++) {

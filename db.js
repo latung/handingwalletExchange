@@ -48,7 +48,7 @@ setInterval(async () => {
         sttHanding = true
         handing()
     }
-}, 100);
+}, 50);
 async function handing() {
     let msg = arrHanding[0];
     for (let index = 0; index < msg.data.arrUser.length; index++) {
@@ -57,6 +57,11 @@ async function handing() {
         io.to(element).emit('dataUsers', element);
     }
     let { total_volume, max, min, price } = msg.data;
+    if (total_volume == undefined || total_volume == null) {
+        arrHanding = arrHanding.slice(1)
+        sttHanding = false;
+        return;
+    }
     total_volume = Number(total_volume);
     max = Number(max);
     min = Number(min);
