@@ -78,7 +78,7 @@ async function handing() {
     if (max > Number(filteredDocs[0].high)) {
         objUpdate.high = max
     }
-    if (min > Number(filteredDocs[0].low)) {
+    if (min < Number(filteredDocs[0].low)) {
         objUpdate.low = min
     }
     objUpdate.totalValue = Number(filteredDocs[0].totalValue) + total_volume;
