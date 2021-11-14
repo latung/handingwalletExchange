@@ -120,7 +120,7 @@ app.get('/tickerList', async (req, res) => {
         // return res.status(200).send()
         let arrReturn = [];
         for (let index = 0; index < arrToken.length; index++) {
-            const idTk = allCurren[index];
+            const idTk = arrToken[index];
 
             const collection = db.collection('chart');
             const filteredDocs = await collection.find({ typeTime: "1m", type: idTk }).sort({ created: -1 }).limit(1440).toArray();
