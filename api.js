@@ -125,7 +125,7 @@ app.get('/tickerList', async (req, res) => {
             const collection = db.collection('chart');
             const filteredDocs = await collection.find({ typeTime: "1m", type: idTk }).sort({ created: -1 }).limit(1440).toArray();
             let low = 0, hight = 0, value24h = 0, price_luctuations = 0, rate_luctuations = 0, value24hUsdt = 0;
-            price_luctuations = filteredDocs[0].close - filteredDocs[1439].close;
+            price_luctuations = filteredDocs[0].close - filteredDocs[filteredDocs.length - 1].close;
             rate_luctuations = price_luctuations * 100 / filteredDocs[0].close
             for (let index = 0; index < filteredDocs.length; index++) {
                 const element = filteredDocs[index];
