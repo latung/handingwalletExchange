@@ -104,45 +104,36 @@ app.post('/listen_chart', async (req, res) => {
     // return res.json('lewlewww')
 })
 
-app.get('/tickerList', async (req, res) => {
+app.get('/ticker', async (req, res) => {
     res.set('Access-Control-Allow-Origin', '*');
     res.set('Access-Control-Allow-Methods', 'GET, POST');
-    // var type = req.query.type,
-    //     typeTime = req.query.typeTime,
-    //     limit = req.query.limit;
-    // limit = Number(limit)
-    let arrToken = ["618ea2878b2577d511268f0b", "618ea27d8b2577d511268efb", "618ea26b8b2577d511268edc", "6184274ce2bf4b4597fab2ab"]
+    var id = req.query.id;
     try {
         await client.connect();
         const db = client.db(dbName);
-        // let allCurren = await db.collection('currencypairs').find().toArray();
-        // console.log(allCurren);
-        // return res.status(200).send()
-        let arrReturn = [];
-        for (let index = 0; index < arrToken.length; index++) {
-            const idTk = arrToken[index];
+        const idTk = id;
 
-            const collection = db.collection('chart');
-            const filteredDocs = await collection.find({ typeTime: "1m", type: idTk }).sort({ created: -1 }).limit(1440).toArray();
-            let low = 0, hight = 0, value24h = 0, price_luctuations = 0, rate_luctuations = 0, value24hUsdt = 0;
-            price_luctuations = filteredDocs[0].close - filteredDocs[filteredDocs.length - 1].close;
-            rate_luctuations = price_luctuations * 100 / filteredDocs[0].close
-            for (let index = 0; index < filteredDocs.length; index++) {
-                const element = filteredDocs[index];
-                value24h += (element.totalValue || 0)
-                value24hUsdt += ((element.totalValue || 0) * (element.close || 0))
-                if (element.low < low) {
-                    low = element.low
-                }
-                if (element.high > hight) {
-                    hight = element.hight
-                }
+        const collection = db.collection('chart');
+        const filteredDocs = await collection.find({ typeTime: "1m", type: idTk }).sort({ created: -1 }).limit(1440).toArray();
+        let low = 0, hight = 0, value24h = 0, price_luctuations = 0, rate_luctuations = 0, value24hUsdt = 0;
+        price_luctuations = filteredDocs[0].close - filteredDocs[filteredDocs.length - 1].close;
+        rate_luctuations = price_luctuations * 100 / filteredDocs[0].close
+        for (let index = 0; index < filteredDocs.length; index++) {
+            const element = filteredDocs[index];
+            value24h += (element.totalValue || 0)
+            value24hUsdt += ((element.totalValue || 0) * (element.close || 0))
+            if (element.low < low) {
+                low = element.low
             }
-            arrReturn.push({
-                id: idTk, low, hight, value24h, price_luctuations, rate_luctuations, value24hUsdt
-            })
+            if (element.high > hight) {
+                hight = element.hight
+            }
         }
-        return res.status(200).send({ status: true, data: arrReturn });
+        return res.status(200).send({
+            status: true, data: {
+                id: idTk, low, hight, value24h, price_luctuations, rate_luctuations, value24hUsdt
+            }
+        });
     } catch (error) {
         console.error("trigger smart contract error", error)
         return res.status(404).send('error');
@@ -150,19 +141,29 @@ app.get('/tickerList', async (req, res) => {
     // return res.json('lewlewww')
 })
 
-app.get('/delete', async (req, res) => {
+app.get('/listHot', async (req, res) => {
     res.set('Access-Control-Allow-Origin', '*');
     res.set('Access-Control-Allow-Methods', 'GET, POST');
-    // var type = req.query.type,
-    //     typeTime = req.query.typeTime,
-    //     limit = req.query.limit;
-    // limit = Number(limit)
+    let arrToken = [
+        {
+            id: '618ea2878b2577d511268f0b',
+            symbol: 'ETH-USDT'
+        },
+        {
+            id: '618ea27d8b2577d511268efb',
+            symbol: 'TRX-USDT'
+        },
+        {
+            id: '618ea26b8b2577d511268edc',
+            symbol: 'BNB-USDT'
+        },
+        {
+            id: '6184274ce2bf4b4597fab2ab',
+            symbol: 'BTC-USDT'
+        }
+    ]
     try {
-        await client.connect();
-        const db = client.db(dbName);
-        const deleteResult = await db.collection('chart').deleteMany({ close: 1 });
-        console.log('Deleted documents =>', deleteResult);
-        return res.status(200).send({ status: true, data: 'arrReturn' });
+        return res.status(200).send({ status: true, data: arrToken });
     } catch (error) {
         console.error("trigger smart contract error", error)
         return res.status(404).send('error');
