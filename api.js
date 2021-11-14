@@ -139,7 +139,7 @@ app.get('/tickerList', async (req, res) => {
                 }
             }
             arrReturn.push({
-                id: currencypairID, low, hight, value24h, price_luctuations, rate_luctuations, value24hUsdt
+                id: idTk, low, hight, value24h, price_luctuations, rate_luctuations, value24hUsdt
             })
         }
         return res.status(200).send({ status: true, data: arrReturn });
