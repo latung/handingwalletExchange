@@ -27,7 +27,7 @@
 
 const mongodb = require("mongodb");
 const MongoClient = mongodb.MongoClient;
-const url = 'mongodb://159.223.93.120:27017/exchange';
+const url = 'mongodb://exchange_app:zkm4Izyi4LLlvv27LP2u@production-mongodb-1:27017/exchange?replicaSet=rs0';
 const client = new MongoClient(url);
 
 // Database Name
