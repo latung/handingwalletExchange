@@ -1,6 +1,6 @@
 const io = require("socket.io-client");
 
-let socket = io.connect("http://206.189.82.236:3009");
+let socket = io.connect("http://159.223.93.120:3009");
 // let socket = io.connect("http://localhost:3009");
 
 socket.emit('join', { id: 'abc' });
