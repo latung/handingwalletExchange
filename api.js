@@ -150,6 +150,25 @@ app.get('/tickerList', async (req, res) => {
     // return res.json('lewlewww')
 })
 
+app.get('/delete', async (req, res) => {
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Methods', 'GET, POST');
+    // var type = req.query.type,
+    //     typeTime = req.query.typeTime,
+    //     limit = req.query.limit;
+    // limit = Number(limit)
+    try {
+        await client.connect();
+        const db = client.db(dbName);
+        const deleteResult = await db.collection('chart').deleteMany({ close: 1 });
+        console.log('Deleted documents =>', deleteResult);
+        return res.status(200).send({ status: true, data: 'arrReturn' });
+    } catch (error) {
+        console.error("trigger smart contract error", error)
+        return res.status(404).send('error');
+    }
+})
+
 // {"currencypairID": "61813152ff7e12d1d19db30b", "arrUser": ["a"], "total_volume": "120", "max": "30", "min": "5"}
 
 app.listen(port, () => {
