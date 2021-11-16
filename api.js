@@ -4,7 +4,10 @@ const app = require('express')();
 const mongodb = require("mongodb");
 const MongoClient = mongodb.MongoClient;
 const url = 'mongodb://exchange_app:zkm4Izyi4LLlvv27LP2u@production-mongodb-1:27017/exchange?replicaSet=rs0';
+// const url = 'mongodb://206.189.82.236:27017/exchange';
 const client = new MongoClient(url);
+// const clientId = new MongoClient(url).ObjectID;
+const ObjectId = require('mongodb').ObjectID;
 let bodyParser = require('body-parser')
 app.use(bodyParser.json())
 
@@ -104,17 +107,33 @@ app.post('/listen_chart', async (req, res) => {
     // return res.json('lewlewww')
 })
 
+
+// base_currency: "61704733facdc35fcd3f87bd"
+// created: "2021-11-14T14:56:32.724Z"
+// quote_currency: "6181663640c544da93bb0ba2"
+// symbol: "ETH-USDT"
+// __v: 0
+// _id: "618ea2878b2577d511268f0b"
 app.get('/ticker', async (req, res) => {
     res.set('Access-Control-Allow-Origin', '*');
     res.set('Access-Control-Allow-Methods', 'GET, POST');
-    var id = req.query.id;
+    var id = req.query.id,
+        base_currency = req.query.base_currency,
+        quote_currency = req.query.quote_currency;
+    console.log('run');
     try {
-        await client.connect();
+        console.log('aaa');
+        await client.connect().catch(er => {
+            console.log('aa');
+        });
         const db = client.db(dbName);
         const idTk = id;
-
+        console.log('a');
         const collection = db.collection('chart');
         const filteredDocs = await collection.find({ typeTime: "1m", type: idTk }).sort({ created: -1 }).limit(1440).toArray();
+        // console.log(new ObjectId(quote_currency));
+        const infoToken = await db.collection('currencies').find({ _id: { $in: [new ObjectId(quote_currency), new ObjectId(base_currency)] } }).toArray();
+        console.log(infoToken);
         let low = 0, hight = 0, value24h = 0, price_luctuations = 0, rate_luctuations = 0, value24hUsdt = 0;
         price_luctuations = filteredDocs[0].close - filteredDocs[filteredDocs.length - 1].close;
         rate_luctuations = price_luctuations * 100 / filteredDocs[0].close
@@ -131,7 +150,7 @@ app.get('/ticker', async (req, res) => {
         }
         return res.status(200).send({
             status: true, data: {
-                id: idTk, low, hight, value24h, price_luctuations, rate_luctuations, value24hUsdt
+                id: idTk, low, hight, value24h, price_luctuations, rate_luctuations, value24hUsdt, infoToken: infoToken
             }
         });
     } catch (error) {
@@ -147,18 +166,26 @@ app.get('/listHot', async (req, res) => {
     let arrToken = [
         {
             id: '618ea2878b2577d511268f0b',
+            base_currency: "61704733facdc35fcd3f87bd",
+            quote_currency: "6181663640c544da93bb0ba2",
             symbol: 'ETH-USDT'
         },
         {
             id: '618ea27d8b2577d511268efb',
+            base_currency: "61704733facdc35fcd3f87bd",
+            quote_currency: "6181663040c544da93bb0b9b",
             symbol: 'TRX-USDT'
         },
         {
             id: '618ea26b8b2577d511268edc',
+            base_currency: "61704733facdc35fcd3f87bd",
+            quote_currency: "6181663340c544da93bb0b9d",
             symbol: 'BNB-USDT'
         },
         {
             id: '6184274ce2bf4b4597fab2ab',
+            quote_currency: "61759c03a261155ef2b0c5e4",
+            base_currency: "61704733facdc35fcd3f87bd",
             symbol: 'BTC-USDT'
         }
     ]
