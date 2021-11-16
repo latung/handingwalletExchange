@@ -3,8 +3,8 @@ const port = 8888
 const app = require('express')();
 const mongodb = require("mongodb");
 const MongoClient = mongodb.MongoClient;
-const url = 'mongodb://exchange_app:zkm4Izyi4LLlvv27LP2u@production-mongodb-1:27017/exchange?replicaSet=rs0';
-// const url = 'mongodb://206.189.82.236:27017/exchange';
+// const url = 'mongodb://exchange_app:zkm4Izyi4LLlvv27LP2u@production-mongodb-1:27017/exchange?replicaSet=rs0';
+const url = 'mongodb://206.189.82.236:27017/exchange';
 const client = new MongoClient(url);
 // const clientId = new MongoClient(url).ObjectID;
 const ObjectId = require('mongodb').ObjectID;
@@ -134,7 +134,7 @@ app.get('/ticker', async (req, res) => {
         // console.log(new ObjectId(quote_currency));
         const infoToken = await db.collection('currencies').find({ _id: { $in: [new ObjectId(quote_currency), new ObjectId(base_currency)] } }).toArray();
         console.log(infoToken);
-        let low = 0, hight = 0, value24h = 0, price_luctuations = 0, rate_luctuations = 0, value24hUsdt = 0;
+        let low = filteredDocs[0].low, hight = filteredDocs[0].high, value24h = 0, price_luctuations = 0, rate_luctuations = 0, value24hUsdt = 0;
         price_luctuations = filteredDocs[0].close - filteredDocs[filteredDocs.length - 1].close;
         rate_luctuations = price_luctuations * 100 / filteredDocs[0].close
         for (let index = 0; index < filteredDocs.length; index++) {
@@ -145,12 +145,12 @@ app.get('/ticker', async (req, res) => {
                 low = element.low
             }
             if (element.high > hight) {
-                hight = element.hight
+                hight = element.high
             }
         }
         return res.status(200).send({
             status: true, data: {
-                id: idTk, low, hight, value24h, price_luctuations, rate_luctuations, value24hUsdt, infoToken: infoToken
+                id: idTk, low, high: hight, value24h, price_luctuations, rate_luctuations, value24hUsdt, infoToken: infoToken
             }
         });
     } catch (error) {
