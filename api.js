@@ -204,7 +204,7 @@ app.get('/deposit', async (req, res) => {
 
     var address = req.query.address,
         hash = req.query.hash,
-        created = req.query.createdAt,
+        created = req.query.created,
         network = req.query.network,
         amount = req.query.amount;
 
@@ -219,7 +219,7 @@ app.get('/deposit', async (req, res) => {
                 created,
                 network,
                 amount,
-                user: uid._id,
+                user: uid[0]._id,
                 status: 'processed'
             }
         ]);
