@@ -209,6 +209,8 @@ app.get('/deposit', async (req, res) => {
         amount = req.query.amount;
 
     try {
+        await client.connect();
+        const db = client.db(dbName);
         const uid = await db.collection('userwallets').find({ address, network }).toArray();
         await db.collection('userevents').insertMany([
             {
