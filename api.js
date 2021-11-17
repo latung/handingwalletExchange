@@ -198,6 +198,36 @@ app.get('/listHot', async (req, res) => {
     }
 })
 
+app.get('/deposit', async (req, res) => {
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Methods', 'GET, POST');
+
+    var address = req.query.address,
+        hash = req.query.hash,
+        created = req.query.createdAt,
+        network = req.query.network,
+        amount = req.query.amount;
+
+    try {
+        const uid = await db.collection('userwallets').find({ address, network }).toArray();
+        await db.collection('userevents').insertMany([
+            {
+                address,
+                hash,
+                created,
+                network,
+                amount,
+                user: uid._id,
+                status: 'processed'
+            }
+        ]);
+        return res.status(200).send({ status: true, data: 'processed' });
+    } catch (error) {
+        console.error("trigger smart contract error", error)
+        return res.status(404).send('error');
+    }
+})
+
 // {"currencypairID": "61813152ff7e12d1d19db30b", "arrUser": ["a"], "total_volume": "120", "max": "30", "min": "5"}
 
 app.listen(port, () => {
