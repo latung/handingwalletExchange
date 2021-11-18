@@ -4,21 +4,20 @@ const readline = require('readline').createInterface({
     input: process.stdin,
     output: process.stdout
 });
-let auther;
+let auther, retime = 15;
 
-
-readline.question('token', tokens => {
-    auther = tokens;//'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3QxMjM0NTYiLCJ1c2VyX2lkIjoiNjE5MjM2MDA1MDI1Y2IzYWM3ODBmZDljIiwiaWF0IjoxNjM3MjM2NjU5LCJleHAiOjE2MzczMjMwNTl9.K7WCzmwq_qErNyKnKHh2jvfu2sH4OU4cClAMxmTFX2M';
-    // console.log(token);
-    // return
-    bnb()
-    trx()
-    btc()
-    eth()
-    console.log('okk! bắt đầu trade nào!!');
-    readline.close();
+readline.question('time', time => {
+    readline.question('token', tokens => {
+        auther = tokens;
+        retime = Number(time);
+        bnb()
+        trx()
+        btc()
+        eth()
+        console.log('okk! bắt đầu trade nào!!');
+        readline.close();
+    });
 });
-
 
 
 async function bnb() {
@@ -64,7 +63,7 @@ async function bnb() {
                         console.log(err);
                         resolve('error')
                     }
-                    console.log('thành công', body);
+                    // console.log('thành công', body);
                     return resolve(JSON.parse(body))
                 })
             });
@@ -136,7 +135,7 @@ async function bnb() {
         while (true) {
             await _doExchangeToTargetByPrice()
             // console.log(Current price: ${getPrice()})
-            await sleep(3 * 1000)
+            await sleep(retime * 1000)
         }
     }
 
@@ -164,7 +163,7 @@ async function bnb() {
         while (true) {
             await _doExchangeToTargetByRange()
             // console.log(Current price: ${getPrice()})
-            await sleep(3 * 1000)
+            await sleep(retime * 1000)
         }
     }
 
@@ -239,7 +238,7 @@ async function trx() {
                         console.log(err);
                         resolve('error')
                     }
-                    console.log('thành công', body);
+                    // console.log('thành công', body);
                     return resolve(JSON.parse(body))
                 })
             });
@@ -311,7 +310,7 @@ async function trx() {
         while (true) {
             await _doExchangeToTargetByPrice()
             // console.log(Current price: ${getPrice()})
-            await sleep(3 * 1000)
+            await sleep(retime * 1000)
         }
     }
 
@@ -339,7 +338,7 @@ async function trx() {
         while (true) {
             await _doExchangeToTargetByRange()
             // console.log(Current price: ${getPrice()})
-            await sleep(3 * 1000)
+            await sleep(retime * 1000)
         }
     }
 
@@ -413,7 +412,7 @@ async function btc() {
                         console.log(err);
                         resolve('error')
                     }
-                    console.log('thành công', body);
+                    // console.log('thành công', body);
                     return resolve(JSON.parse(body))
                 })
             });
@@ -485,7 +484,7 @@ async function btc() {
         while (true) {
             await _doExchangeToTargetByPrice()
             // console.log(Current price: ${getPrice()})
-            await sleep(3 * 1000)
+            await sleep(retime * 1000)
         }
     }
 
@@ -513,7 +512,7 @@ async function btc() {
         while (true) {
             await _doExchangeToTargetByRange()
             // console.log(Current price: ${getPrice()})
-            await sleep(3 * 1000)
+            await sleep(retime * 1000)
         }
     }
 
@@ -586,7 +585,7 @@ async function eth() {
                         console.log(err);
                         resolve('error')
                     }
-                    console.log('thành công', body);
+                    // console.log('thành công', body);
                     return resolve(JSON.parse(body))
                 })
             });
@@ -658,7 +657,7 @@ async function eth() {
         while (true) {
             await _doExchangeToTargetByPrice()
             // console.log(Current price: ${getPrice()})
-            await sleep(3 * 1000)
+            await sleep(retime * 1000)
         }
     }
 
@@ -686,7 +685,7 @@ async function eth() {
         while (true) {
             await _doExchangeToTargetByRange()
             // console.log(Current price: ${getPrice()})
-            await sleep(3 * 1000)
+            await sleep(retime * 1000)
         }
     }
 
