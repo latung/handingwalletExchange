@@ -138,9 +138,10 @@ app.get('/ticker', async (req, res) => {
         price_luctuations = filteredDocs[0].close - filteredDocs[filteredDocs.length - 1].close;
         rate_luctuations = price_luctuations * 100 / filteredDocs[0].close
         let listPriceDay = [];
+        lastPrice = filteredDocs[0].close;
         for (let index = 0; index < filteredDocs.length; index++) {
             const element = filteredDocs[index];
-            lastPrice = element.close;
+            // lastPrice = element.close;
             value24h += (element.totalValue || 0)
             value24hUsdt += ((element.totalValue || 0) * (element.close || 0))
             if (element.low < low) {
@@ -149,7 +150,7 @@ app.get('/ticker', async (req, res) => {
             if (element.high > hight) {
                 hight = element.high
             }
-            listPriceDay.push(lastPrice)
+            listPriceDay.push(element.close)
         }
         return res.status(200).send({
             status: true, data: {
