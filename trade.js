@@ -43,7 +43,7 @@ async function bnb() {
 
         return new Promise((resolve, reject) => {
             let options = {
-                uri: 'http://159.223.93.120/order',
+                uri: 'https://api.asseasy.com/order',
                 method: 'POST',
                 headers: {
                     'Authorization': auther,
@@ -218,7 +218,7 @@ async function trx() {
 
         return new Promise((resolve, reject) => {
             let options = {
-                uri: 'http://159.223.93.120/order',
+                uri: 'https://api.asseasy.com/order',
                 method: 'POST',
                 headers: {
                     'Authorization': auther,
@@ -392,7 +392,7 @@ async function btc() {
 
         return new Promise((resolve, reject) => {
             let options = {
-                uri: 'http://159.223.93.120/order',
+                uri: 'https://api.asseasy.com/order',
                 method: 'POST',
                 headers: {
                     'Authorization': auther,
@@ -565,7 +565,7 @@ async function eth() {
 
         return new Promise((resolve, reject) => {
             let options = {
-                uri: 'http://159.223.93.120/order',
+                uri: 'https://api.asseasy.com/order',
                 method: 'POST',
                 headers: {
                     'Authorization': auther,
