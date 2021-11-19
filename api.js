@@ -15,7 +15,7 @@ app.use(bodyParser.json())
 const dbName = 'exchange';
 
 const io = require("socket.io-client");
-let socket = io.connect("https://api2.asseasy.com/ws");
+let socket = io.connect("http://159.223.93.120:3009");
 // let socket = io.connect("http://localhost:3009");
 
 // socket.on("welcome", (data) => {
