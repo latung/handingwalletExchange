@@ -15,12 +15,14 @@ app.use(bodyParser.json())
 const dbName = 'exchange';
 
 const io = require("socket.io-client");
-let socket = io.connect("http://159.223.93.120:3009");
+let socket = io.connect("https://api3.asseasy.com");
 // let socket = io.connect("http://localhost:3009");
 
 // socket.on("welcome", (data) => {
 //     console.log(data);
 // })
+
+
 
 
 app.get('/addChart', async (req, res) => {
@@ -233,6 +235,117 @@ app.get('/deposit', async (req, res) => {
     }
 })
 
+
+app.get('/list-order', async (req, res) => {
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Methods', 'GET, POST');
+
+    var pair = req.query.pair,
+        limit = req.query.limit,
+        price = req.query.price,
+        filter = req.query.filter,
+        side = req.query.side;
+    // toFidex = req.query.toFidex;
+    limit = Number(limit);
+    price = Number(price);
+    filter = Number(filter);
+    // toFidex = Number(toFidex);
+    let a = Date.now();
+    try {
+        await client.connect();
+        const db = client.db(dbName);
+        // let avc = await db.collection('currencypairs').find({}).toArray()
+        // console.log(avc);
+        let handingBuy = [], handingSell = [], oldBuy = price, oldSell = price, resultBuy = {}, resultSell = {};
+        for (let index = 0; index < limit; index++) {
+            let to, toSell;
+            if (index == 0) {
+                to = oldBuy - (filter >= 1 ? oldBuy % filter : Number((oldBuy % filter).toFixed(filter.toString().length - 1)));
+                toSell = oldSell - (filter >= 1 ? oldSell % filter : Number((oldSell % filter).toFixed(filter.toString().length - 1))) + filter;
+            } else {
+                to = oldBuy - filter;
+                toSell = oldSell + filter;
+            }
+            oldBuy = to;
+            oldSell = toSell;
+
+            if (index == 0) {
+                handingBuy.push({
+                    form: price, to
+                })
+                handingSell.push({
+                    form: price, to: toSell
+                })
+            } else {
+                handingBuy.push({
+                    form: (to + filter) - ((to + filter) * 0.000000001), to: (filter >= 1 ? to : Number(to.toFixed(filter.toString().length - 1)))
+                })
+                handingSell.push({
+                    form: (toSell - filter) + ((toSell + filter) * 0.000000001), to: (filter >= 1 ? toSell : Number(toSell.toFixed(filter.toString().length - 1)))
+                })
+            }
+        }
+        // console.log(handingBuy);
+        // console.log(handingSell);
+        const requestsBuy = handingBuy.map((user) => {
+            return new Promise(async (resolve, reject) => {
+                let data = await db.collection('orders').find({ currency_pair: new ObjectId(pair), side, status: 'active', price: { '$gt': user.to, '$lt': user.form } }).toArray()
+                // console.log(data[0]);
+                resultBuy[user.to] = { totalQuantity: (resultBuy[user.to]?.quantity | 0) + (data[0]?.quantity | 0), price: user.to }
+                resolve();
+            });
+        });
+
+        const requestsSell = handingSell.map((user) => {
+            return new Promise(async (resolve, reject) => {
+                let data = await db.collection('orders').find({ currency_pair: new ObjectId(pair), side, status: 'active', price: { '$gt': user.form, '$lt': user.to } }).toArray()
+                // console.log(data[0]);
+                resultSell[user.to] = { totalQuantity: (resultSell[user.to]?.quantity | 0) + (data[0]?.quantity | 0), price: user.to }
+                resolve();
+            });
+        });
+
+        let submitBuy = new Promise(async (resolve, reject) => {
+            Promise.all(requestsBuy).then(() => {
+                resolve();
+            }).catch((e) => {
+                resolve()
+            });
+        })
+        let submitSell = new Promise(async (resolve, reject) => {
+            Promise.all(requestsSell).then(() => {
+                resolve();
+            }).catch((e) => {
+                resolve()
+            });
+        })
+        await Promise.all([submitBuy, submitSell]).catch((e) =>
+            console.log(`Error in sending email for the batch ${i} - ${e}`)
+        );
+
+        // console.log(abc);
+        // console.log(dataAll);
+
+        // const dataOrders = await db.collection('orders').find({ currency_pair: new ObjectId(pair), side, status: 'active' }).sort({ price: side == 'buy' ? -1 : 1 }).toArray();
+        console.log(Date.now() - a);
+        // await db.collection('userevents').insertMany([
+        //     {
+        //         address,
+        //         hash,
+        //         created,
+        //         network,
+        //         amount,
+        //         user: uid[0]._id,
+        //         status: 'processed'
+        //     }
+        // ]);
+        // console.log(dataOrders);
+        return res.status(200).send({ status: true, data: { resultBuy, resultSell } });
+    } catch (error) {
+        console.error("trigger smart contract error", error)
+        return res.status(404).send('error');
+    }
+})
 // {"currencypairID": "61813152ff7e12d1d19db30b", "arrUser": ["a"], "total_volume": "120", "max": "30", "min": "5"}
 
 app.listen(port, () => {
