@@ -291,7 +291,7 @@ app.get('/list-order', async (req, res) => {
             return new Promise(async (resolve, reject) => {
                 let data = await db.collection('orders').find({ currency_pair: new ObjectId(pair), side, status: 'active', price: { '$gt': user.to, '$lt': user.form } }).toArray()
                 // console.log(data[0]);
-                resultBuy[user.to] = { totalQuantity: (resultBuy[user.to]?.quantity | 0) + (data[0]?.quantity | 0), price: user.to }
+                resultBuy[user.to] = { totalQuantity: (resultBuy[user.to] == undefined ? 0 : resultBuy[user.to].quantity) + (data[0] == undefined ? 0 : data[0].quantity), price: user.to }
                 resolve();
             });
         });
@@ -300,7 +300,7 @@ app.get('/list-order', async (req, res) => {
             return new Promise(async (resolve, reject) => {
                 let data = await db.collection('orders').find({ currency_pair: new ObjectId(pair), side, status: 'active', price: { '$gt': user.form, '$lt': user.to } }).toArray()
                 // console.log(data[0]);
-                resultSell[user.to] = { totalQuantity: (resultSell[user.to]?.quantity | 0) + (data[0]?.quantity | 0), price: user.to }
+                resultSell[user.to] = { totalQuantity: (resultSell[user.to] == undefined ? 0 : resultSell[user.to].quantity) + (data[0] == undefined ? 0 : data[0].quantity), price: user.to }
                 resolve();
             });
         });
