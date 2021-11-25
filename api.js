@@ -154,9 +154,31 @@ app.get('/ticker', async (req, res) => {
             }
             listPriceDay.push(element.close)
         }
+        let listFilter;
+        if (Number(lastPrice) > 1000) {
+            listFilter = [100, 50, 10, , 1, 0.1, 0.01]
+        } else if (Number(lastPrice) > 100) {
+            listFilter = [10, 1, 0.1, 0.01]
+        } else if (Number(lastPrice) > 10) {
+            listFilter = [1, 0.1, 0.01, 0.001]
+        } else if (Number(lastPrice) > 1) {
+            listFilter = [0.1, 0.01, 0.001]
+        } else if (Number(lastPrice) > 0.1) {
+            listFilter = [0.1, 0.01, 0.001, 0.0001]
+        } else if (Number(lastPrice) > 0.01) {
+            listFilter = [0.01, 0.001, 0.0001, 0.00001]
+        } else if (Number(lastPrice) > 0.001) {
+            listFilter = [0.001, 0.0001, 0.00001, 0.000001]
+        } else if (Number(lastPrice) > 0.0001) {
+            listFilter = [0.0001, 0.00001, 0.000001, 0.0000001]
+        } else if (Number(lastPrice) > 0.00001) {
+            listFilter = [0.00001, 0.000001, 0.0000001, 0.00000001]
+        } else if (Number(lastPrice) > 0.000001) {
+            listFilter = [0.000001, 0.0000001, 0.00000001, 0.000000001]
+        }
         return res.status(200).send({
             status: true, data: {
-                id: idTk, low, high: hight, lastPrice, value24h, price_luctuations, rate_luctuations, value24hUsdt, infoToken: infoToken, listPriceDay
+                id: idTk, low, high: hight, lastPrice, value24h, price_luctuations, rate_luctuations, value24hUsdt, infoToken: infoToken, listPriceDay, listFilter
             }
         });
     } catch (error) {
