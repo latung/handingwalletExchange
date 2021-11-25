@@ -3,8 +3,8 @@ const port = 8888
 const app = require('express')();
 const mongodb = require("mongodb");
 const MongoClient = mongodb.MongoClient;
-const url = 'mongodb://exchange_app:zkm4Izyi4LLlvv27LP2u@production-mongodb-1:27017/exchange?replicaSet=rs0';
-// const url = 'mongodb://206.189.82.236:27017/exchange';
+// const url = 'mongodb://exchange_app:zkm4Izyi4LLlvv27LP2u@production-mongodb-1:27017/exchange?replicaSet=rs0';
+const url = 'mongodb://206.189.82.236:27017/exchange';
 const client = new MongoClient(url);
 // const clientId = new MongoClient(url).ObjectID;
 const ObjectId = require('mongodb').ObjectID;
@@ -254,9 +254,7 @@ app.get('/list-order', async (req, res) => {
     try {
         await client.connect();
         const db = client.db(dbName);
-        // let avc = await db.collection('currencypairs').find({}).toArray()
-        // console.log(avc);
-        let handingBuy = [], handingSell = [], oldBuy = price, oldSell = price, resultBuy = {}, resultSell = {};
+        let handingBuy = [], handingSell = [], oldBuy = price, oldSell = price, resultBuy = {}, resultSell = {}, priceChuan = oldBuy - (filter >= 1 ? oldBuy % filter : Number((oldBuy % filter).toFixed(filter.toString().length - 1)));
         for (let index = 0; index < limit; index++) {
             let to, toSell;
             if (index == 0) {
@@ -278,68 +276,76 @@ app.get('/list-order', async (req, res) => {
                 })
             } else {
                 handingBuy.push({
-                    form: (to + filter) - ((to + filter) * 0.000000001), to: (filter >= 1 ? to : Number(to.toFixed(filter.toString().length - 1)))
+                    form: to + filter, to: (filter >= 1 ? to : Number(to.toFixed(filter.toString().length - 1)))
                 })
                 handingSell.push({
-                    form: (toSell - filter) + ((toSell + filter) * 0.000000001), to: (filter >= 1 ? toSell : Number(toSell.toFixed(filter.toString().length - 1)))
+                    form: toSell - filter, to: (filter >= 1 ? toSell : Number(toSell.toFixed(filter.toString().length - 1)))
                 })
             }
         }
-        // console.log(handingBuy);
+        let dataOrder = await db.collection('orders').find({ currency_pair: new ObjectId(pair), side, status: 'active', price: { '$gt': priceChuan - (limit * filter), '$lt': priceChuan + (limit * filter) } }).toArray()
         // console.log(handingSell);
-        const requestsBuy = handingBuy.map((user) => {
-            return new Promise(async (resolve, reject) => {
-                let data = await db.collection('orders').find({ currency_pair: new ObjectId(pair), side, status: 'active', price: { '$gt': user.to, '$lt': user.form } }).toArray()
-                // console.log(data[0]);
-                resultBuy[user.to] = { totalQuantity: (resultBuy[user.to] == undefined ? 0 : resultBuy[user.to].quantity) + (data[0] == undefined ? 0 : data[0].quantity), price: user.to }
-                resolve();
-            });
-        });
 
-        const requestsSell = handingSell.map((user) => {
-            return new Promise(async (resolve, reject) => {
-                let data = await db.collection('orders').find({ currency_pair: new ObjectId(pair), side, status: 'active', price: { '$gt': user.form, '$lt': user.to } }).toArray()
-                // console.log(data[0]);
-                resultSell[user.to] = { totalQuantity: (resultSell[user.to] == undefined ? 0 : resultSell[user.to].quantity) + (data[0] == undefined ? 0 : data[0].quantity), price: user.to }
-                resolve();
-            });
-        });
+        for (let index = 0; index < handingBuy.length; index++) {
+            const element = handingBuy[index];
+            let dataOrderFilter;
+            if (index == 0) {
+                dataOrderFilter = dataOrder.filter((item) => (item.price >= element.to && item.price <= element.form))
+            } else {
+                dataOrderFilter = dataOrder.filter((item) => (item.price >= element.to && item.price < element.form))
+            }
+            resultBuy[element.to] = { totalQuantity: (resultBuy[element.to] == undefined ? 0 : resultBuy[element.to].quantity) + (dataOrderFilter[0] == undefined ? 0 : dataOrderFilter[0].quantity), price: element.to }
+        }
 
-        let submitBuy = new Promise(async (resolve, reject) => {
-            Promise.all(requestsBuy).then(() => {
-                resolve();
-            }).catch((e) => {
-                resolve()
-            });
-        })
-        let submitSell = new Promise(async (resolve, reject) => {
-            Promise.all(requestsSell).then(() => {
-                resolve();
-            }).catch((e) => {
-                resolve()
-            });
-        })
-        await Promise.all([submitBuy, submitSell]).catch((e) =>
-            console.log(`Error in sending email for the batch ${i} - ${e}`)
-        );
+        for (let index = 0; index < handingSell.length; index++) {
+            const element = handingSell[index];
+            let dataOrderFilter;
+            if (index == 0) {
+                dataOrderFilter = dataOrder.filter((item) => (item.price >= element.form && item.price <= element.to))
+            } else {
+                dataOrderFilter = dataOrder.filter((item) => (item.price > element.form && item.price <= element.to))
+            }
+            resultSell[element.to] = { totalQuantity: (resultSell[element.to] == undefined ? 0 : resultSell[element.to].quantity) + (dataOrderFilter[0] == undefined ? 0 : dataOrderFilter[0].quantity), price: element.to }
+        }
 
-        // console.log(abc);
-        // console.log(dataAll);
+        // const requestsBuy = handingBuy.map((user) => {
+        //     return new Promise(async (resolve, reject) => {
+        //         let data = await db.collection('orders').find({ currency_pair: new ObjectId(pair), side, status: 'active', price: { '$gt': user.to, '$lt': user.form } }).toArray()
+        //         // console.log(data[0]);
+        //         resultBuy[user.to] = { totalQuantity: (resultBuy[user.to] == undefined ? 0 : resultBuy[user.to].quantity) + (data[0] == undefined ? 0 : data[0].quantity), price: user.to }
+        //         resolve();
+        //     });
+        // });
 
-        // const dataOrders = await db.collection('orders').find({ currency_pair: new ObjectId(pair), side, status: 'active' }).sort({ price: side == 'buy' ? -1 : 1 }).toArray();
+        // const requestsSell = handingSell.map((user) => {
+        //     return new Promise(async (resolve, reject) => {
+        //         let data = await db.collection('orders').find({ currency_pair: new ObjectId(pair), side, status: 'active', price: { '$gt': user.form, '$lt': user.to } }).toArray()
+        //         // console.log(data[0]);
+        //         resultSell[user.to] = { totalQuantity: (resultSell[user.to] == undefined ? 0 : resultSell[user.to].quantity) + (data[0] == undefined ? 0 : data[0].quantity), price: user.to }
+        //         resolve();
+        //     });
+        // });
+
+        // let submitBuy = new Promise(async (resolve, reject) => {
+        //     Promise.all(requestsBuy).then(() => {
+        //         resolve();
+        //     }).catch((e) => {
+        //         resolve()
+        //     });
+        // })
+        // let submitSell = new Promise(async (resolve, reject) => {
+        //     Promise.all(requestsSell).then(() => {
+        //         resolve();
+        //     }).catch((e) => {
+        //         resolve()
+        //     });
+        // })
+        // await Promise.all([submitBuy, submitSell]).catch((e) =>
+        //     console.log(`Error in sending email for the batch ${i} - ${e}`)
+        // );
+
         console.log(Date.now() - a);
-        // await db.collection('userevents').insertMany([
-        //     {
-        //         address,
-        //         hash,
-        //         created,
-        //         network,
-        //         amount,
-        //         user: uid[0]._id,
-        //         status: 'processed'
-        //     }
-        // ]);
-        // console.log(dataOrders);
+
         return res.status(200).send({ status: true, data: { resultBuy, resultSell } });
     } catch (error) {
         console.error("trigger smart contract error", error)
