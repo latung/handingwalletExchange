@@ -383,8 +383,9 @@ app.get('/list-order', async (req, res) => {
         // );
 
         console.log(Date.now() - a);
-
-        return res.status(200).send({ status: true, data: { arrResultBuy, arrResultSell } });
+        resultSell = arrResultSell;
+        resultBuy = arrResultBuy;
+        return res.status(200).send({ status: true, data: { resultBuy, resultSell } });
     } catch (error) {
         console.error("trigger smart contract error", error)
         return res.status(404).send('error');
