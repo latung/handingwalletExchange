@@ -10,9 +10,9 @@ readline.question('time', time => {
     readline.question('token', tokens => {
         auther = tokens;
         retime = Number(time);
-        bnb()
-        trx()
-        btc()
+        // bnb()
+        // trx()
+        // btc()
         eth()
         console.log('okk! bắt đầu trade nào!!');
         readline.close();
