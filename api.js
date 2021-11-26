@@ -330,6 +330,22 @@ app.get('/list-order', async (req, res) => {
             resultSell[element.to] = { totalQuantity: (resultSell[element.to] == undefined ? 0 : resultSell[element.to].quantity) + (dataOrderFilter[0] == undefined ? 0 : dataOrderFilter[0].quantity), price: element.to }
         }
 
+        let arrResultBuy = [], arrResultSell = [];
+
+        for (const key in resultSell) {
+            if (Object.hasOwnProperty.call(resultSell, key)) {
+                const element = resultSell[key];
+                arrResultSell.push(element)
+            }
+        }
+
+        for (const key in resultBuy) {
+            if (Object.hasOwnProperty.call(resultBuy, key)) {
+                const element = resultBuy[key];
+                arrResultBuy.push(element)
+            }
+        }
+
         // const requestsBuy = handingBuy.map((user) => {
         //     return new Promise(async (resolve, reject) => {
         //         let data = await db.collection('orders').find({ currency_pair: new ObjectId(pair), side, status: 'active', price: { '$gt': user.to, '$lt': user.form } }).toArray()
@@ -368,7 +384,7 @@ app.get('/list-order', async (req, res) => {
 
         console.log(Date.now() - a);
 
-        return res.status(200).send({ status: true, data: { resultBuy, resultSell } });
+        return res.status(200).send({ status: true, data: { arrResultBuy, arrResultSell } });
     } catch (error) {
         console.error("trigger smart contract error", error)
         return res.status(404).send('error');
